@@ -7,7 +7,17 @@
 
 # MAGIC %md
 # MAGIC 
-# MAGIC <font color='red'><b> 1. Connect to JDBC
+# MAGIC <font color='red'><b> 1. Secret Scope
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC 
+# MAGIC <font color='red'><b> 2. Connect to JDBC
 
 # COMMAND ----------
 
