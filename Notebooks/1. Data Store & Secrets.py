@@ -56,13 +56,13 @@ jdbcUrl = f"jdbc:sqlserver://{jdbcHostname}:{jdbcPort};databaseName={dbn};user={
 #########################################################################################################
 # METHOD 2
 
-connectionString = 'jdbc:sqlserver://dbsserver.database.windows.net:1433;database=Backup_AdventureWorksDW2019;user=sauser@dbsserver;password=Adventure9#;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;'
+connectionString = f'jdbc:sqlserver://dbsserver.database.windows.net:1433;database={dbn};user={usern};password={passn};encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;'
 
-
+# jdbc:sqlserver://dbsserver.database.windows.net:1433;database=Backup_AdventureWorksDW2019;user=sauser@dbsserver;password={your_password_here};encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;
 
 # COMMAND ----------
 
-display(jdbcUrl)
+display()
 
 # COMMAND ----------
 
@@ -70,7 +70,7 @@ display(jdbcUrl)
 
 df = spark.read.format("jdbc").option("url", jdbcUrl).option("dbtable","dbo.DimProduct").load()
 
-display(df)
+display(df.limit(5))
 
 # COMMAND ----------
 
@@ -78,7 +78,7 @@ display(df)
 
 df1 = spark.read.jdbc(connectionString, "dbo.DimProduct")
 
-display(df1.limit(4))
+display(df1.limit(2))
 
 # COMMAND ----------
 
