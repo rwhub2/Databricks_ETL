@@ -100,14 +100,20 @@ dbutils.fs.mount(
 
 # COMMAND ----------
 
+# dbutils.fs.rm("dbfs:/mnt", True)
+
+dbutils.fs.unmount("/mnt/")
+
+# COMMAND ----------
+
 # BLOB MOUNT
 
 # dbutils.fs.help("mount")
 
 dbutils.fs.mount(
-    source = "wasbs://input@sinkblobb.blob.core.windows.net/"
+    source = "wasbs://input@sinkblobb.blob.core.windows.net/input"
     ,mount_point = "/mount/sinkblob"
-    ,extra_configs = {"fs.azure.account.key.sinkblobb.blob.core.windows.net/":"Ufo9ShLDy7JWLWUVtn5ICrgPF0ehUdjtlOWCkCyD52d/tTFlR1UBbqH7Jv3QibbHWC/yJ1JnHOH2+AStbiOgaQ=="}
+    ,extra_configs = {"fs.azure.account.key.sinkblobb.blob.core.windows.net/":"t0x/ck6Q7omG76EuFZGxquGvlClrrYWdD0jr/3K0pwFlbIQSRTSXUF6S56TFqzhA19nbILs6j37L+AStToGrqw=="}
 )
 
 # COMMAND ----------
