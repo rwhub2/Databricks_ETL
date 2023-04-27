@@ -82,4 +82,40 @@ display(df1.limit(2))
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC 
+# MAGIC <font color='red'><b> 3. Mount Object Store
+
+# COMMAND ----------
+
+# DATA LAKE MOUNT
+
+# dbutils.fs.help("mount")
+
+dbutils.fs.mount(
+    'adl://input@sinkadls.dfs.core.windows.net/'
+    ,"/mnt/sinkblob"
+    ,extra_configs = {"fs.azure.account.key.sinkadls.dfs.core.windows.net/":"wz808VyRGO88Lw3Y/eB4JOJx4eVJodU3Y9g3rTwWH3abQ/Yqb/mpC24WCZD9V7ozSu6nSCrXsGm8+ASt6SXPuQ=="}
+)
+
+# COMMAND ----------
+
+# BLOB MOUNT
+
+# dbutils.fs.help("mount")
+
+dbutils.fs.mount(
+    source = "wasbs://input@sinkblobb.blob.core.windows.net/"
+    ,mount_point = "/mount/sinkblob"
+    ,extra_configs = {"fs.azure.account.key.sinkblobb.blob.core.windows.net/":"Ufo9ShLDy7JWLWUVtn5ICrgPF0ehUdjtlOWCkCyD52d/tTFlR1UBbqH7Jv3QibbHWC/yJ1JnHOH2+AStbiOgaQ=="}
+)
+
+# COMMAND ----------
+
+# dbutils.fs.help("unmount")
+
+dbutils.fs.unmount("/mnt/sinkblob")
+
+# COMMAND ----------
+
 
