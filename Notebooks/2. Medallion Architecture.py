@@ -11,6 +11,7 @@
 
 # COMMAND ----------
 
+
 # dbutils.secrets.list('databricksSecrets')
 
 dbn = dbutils.secrets.get('databricksSecrets','sqldatabase')
@@ -108,11 +109,49 @@ configs = {"fs.azure.account.auth.type": "OAuth"
 
 dbutils.fs.mount(
     source = 'abfss://input@sinkadls.dfs.core.windows.net/'
-    ,mount_point = "/mnt/sinkblob"
+    ,mount_point = "/mnt/input"
     ,extra_configs = configs
 )
 
 
+
+# COMMAND ----------
+
+dbutils.fs.unmount("/mnt/sinkblob")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC
+# MAGIC <font color='red'><b> 4. BRONZE LAYER - ingest data from data lake
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC CREATE TABLE IF NOT EXISTS dimProduct (
+# MAGIC     id  STRING NOT NULL
+# MAGIC ) using DELTA
+
+# COMMAND ----------
+
+bronze_product = (spark.readStream.format("cloudFiles")\
+                .option("cloudFiles.format", "csv")\
+                .option("cloudFiles.maxFilesPerTrigger", "1")\
+                .option("Header", "true")\
+                .option("cloudFiles.schemaLocation",'dbfs:/mnt/input/')\
+                .load("dbfs:/mnt/input/dimDate.csv")
+)
+
+display(bronze_product)
+
+# COMMAND ----------
+
+ff = spark.read.csv("dbfs:/mnt/input/dimDate.csv")
+
+display(ff)
 
 # COMMAND ----------
 
