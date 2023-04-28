@@ -1,13 +1,13 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC
-# MAGIC ### Create Data Store & Secrets
+# MAGIC ### Medallion Architecture
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC
-# MAGIC <font color='red'><b> 1. Secret Scope
+# MAGIC <span style="color: red"><b> 1. Secret Scope</span>
 
 # COMMAND ----------
 
@@ -62,10 +62,6 @@ connectionString = f'jdbc:sqlserver://dbsserver.database.windows.net:1433;databa
 
 # COMMAND ----------
 
-display()
-
-# COMMAND ----------
-
 # METHOD 1
 
 df = spark.read.format("jdbc").option("url", jdbcUrl).option("dbtable","dbo.DimProduct").load()
@@ -89,30 +85,6 @@ display(df1.limit(2))
 # COMMAND ----------
 
 dbutils.secrets.list("databricksSecrets")
-
-# COMMAND ----------
-
-# spark.conf.set(
-#     "fs.azure.account.key.sinkadls.dfs.core.windows.net",
-#     "pfxx911GULf87okc+o1uIi0ldNstXuRPKKLmjCXZVR469lb/Q+hFe5LcdcHe6IpewONGbOdXYXfe+AStiEVB7w==")
-
-
-service_credential = dbutils.secrets.get(scope="databricksSecrets",key="service-cred")
-
-spark.conf.set("fs.azure.account.auth.type.sinkadls.dfs.core.windows.net", "OAuth")
-spark.conf.set("fs.azure.account.oauth.provider.type.sinkadls.dfs.core.windows.net", "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider")
-spark.conf.set("fs.azure.account.oauth2.client.id.sinkadls.dfs.core.windows.net", "634d8a52-7fcb-4126-ae0b-441246f3508d")
-spark.conf.set("fs.azure.account.oauth2.client.secret.sinkadls.dfs.core.windows.net", service_credential)
-spark.conf.set("fs.azure.account.oauth2.client.endpoint.sinkadls.dfs.core.windows.net", "https://login.microsoftonline.com/eaf52279-66e9-4cb9-9041-3c8e29d0cdd1/oauth2/token")
-
-
-# COMMAND ----------
-
-ef = spark.read.csv("abfs://input@sinkadls.dfs.core.windows.net/dimDate.csv", header=True)
-
-display(ef)
-
-# dbutils.fs.ls("adl://input@sinkadls.dfs.core.windows.net/")
 
 # COMMAND ----------
 
@@ -141,30 +113,6 @@ dbutils.fs.mount(
 )
 
 
-
-# COMMAND ----------
-
-# dbutils.fs.rm("dbfs:/mnt", True)
-
-dbutils.fs.unmount("/mnt/")
-
-# COMMAND ----------
-
-# BLOB MOUNT
-
-# dbutils.fs.help("mount")
-
-dbutils.fs.mount(
-    source = "wasbs://input@sinkblobb.blob.core.windows.net/input"
-    ,mount_point = "/mnt/sinkblob"
-    ,extra_configs = {"fs.azure.account.key.sinkblobb.blob.core.windows.net/":"t0x/ck6Q7omG76EuFZGxquGvlClrrYWdD0jr/3K0pwFlbIQSRTSXUF6S56TFqzhA19nbILs6j37L+AStToGrqw=="}
-)
-
-# COMMAND ----------
-
-# dbutils.fs.help("unmount")
-
-dbutils.fs.unmount("/mnt/sinkblob")
 
 # COMMAND ----------
 
