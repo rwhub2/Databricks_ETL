@@ -117,7 +117,7 @@ dbutils.fs.mount(
 
 # COMMAND ----------
 
-dbutils.fs.unmount("/mnt/sinkblob")
+dbutils.fs.unmount("/mnt/input")
 
 # COMMAND ----------
 
@@ -140,9 +140,9 @@ dbutils.fs.unmount("/mnt/sinkblob")
 bronze_product = (spark.readStream.format("cloudFiles")\
                 .option("cloudFiles.format", "csv")\
                 .option("cloudFiles.maxFilesPerTrigger", "1")\
-                .option("Header", "true")\
+                .option("cloudFiles.inferColumnTypes", True)\
                 .option("cloudFiles.schemaLocation",'dbfs:/mnt/input/')\
-                .load("dbfs:/mnt/input/dimDate.csv")
+                .load("dbfs:/mnt/input/")
 )
 
 display(bronze_product)
