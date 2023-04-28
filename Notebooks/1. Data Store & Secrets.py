@@ -1,12 +1,12 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC 
+# MAGIC
 # MAGIC ### Create Data Store & Secrets
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC 
+# MAGIC
 # MAGIC <font color='red'><b> 1. Secret Scope
 
 # COMMAND ----------
@@ -26,7 +26,7 @@ dbutils.secrets.list('databricksSecrets')
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC 
+# MAGIC
 # MAGIC <font color='red'><b> 2. Connect to JDBC
 
 # COMMAND ----------
@@ -83,8 +83,34 @@ display(df1.limit(2))
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC 
+# MAGIC
 # MAGIC <font color='red'><b> 3. Mount Object Store
+
+# COMMAND ----------
+
+spark.conf.set(
+    "fs.azure.account.key.sinkadls.dfs.core.windows.net",
+    "pfxx911GULf87okc+o1uIi0ldNstXuRPKKLmjCXZVR469lb/Q+hFe5LcdcHe6IpewONGbOdXYXfe+AStiEVB7w==")
+
+
+service_credential = dbutils.secrets.get(scope="databricksSecrets",key="service-cred")
+
+spark.conf.set("fs.azure.account.auth.type.sinkadls.dfs.core.windows.net", "OAuth")
+spark.conf.set("fs.azure.account.oauth.provider.type.sinkadls.dfs.core.windows.net", "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider")
+spark.conf.set("fs.azure.account.oauth2.client.id.sinkadls.dfs.core.windows.net", "634d8a52-7fcb-4126-ae0b-441246f3508d")
+spark.conf.set("fs.azure.account.oauth2.client.secret.sinkadls.dfs.core.windows.net", service_credential)
+spark.conf.set("fs.azure.account.oauth2.client.endpoint.sinkadls.dfs.core.windows.net", "https://login.microsoftonline.com/eaf52279-66e9-4cb9-9041-3c8e29d0cdd1/oauth2/token")
+
+
+# COMMAND ----------
+
+# spark.read.load("adl://input@sinkadls.dfs.core.windows.net/")
+
+# dbutils.fs.ls("adl://input@sinkadls.dfs.core.windows.net/")
+
+# COMMAND ----------
+
+# help(spark.conf)
 
 # COMMAND ----------
 
