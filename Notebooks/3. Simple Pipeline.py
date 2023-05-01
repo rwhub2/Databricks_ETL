@@ -11,24 +11,51 @@
 
 # COMMAND ----------
 
-
-# dbutils.secrets.list('databricksSecrets')
-
-dbn = dbutils.secrets.get('databricksSecrets','sqldatabase')
-usern = dbutils.secrets.get('databricksSecrets','userName')
-passn = dbutils.secrets.get('databricksSecrets','password')
-
-# display(usern)
-
-# COMMAND ----------
-
 dbutils.secrets.list('databricksSecrets')
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC
-# MAGIC <font color='red'><b> 2. Connect to JDBC
+# MAGIC <font color='red'><b> 2. SOURCE DATA - Mount Object Store
+
+# COMMAND ----------
+
+configs = {"fs.azure.account.auth.type": "OAuth"
+,"fs.azure.account.oauth.provider.type": "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider"
+,"fs.azure.account.oauth2.client.id": "634d8a52-7fcb-4126-ae0b-441246f3508d"
+,"fs.azure.account.oauth2.client.secret": dbutils.secrets.get(scope="databricksSecrets",key="service-cred")
+,"fs.azure.account.oauth2.client.endpoint": "https://login.microsoftonline.com/eaf52279-66e9-4cb9-9041-3c8e29d0cdd1/oauth2/token"
+,"fs.azure.createRemoteFileSystemDuringInitialization":"true"
+}
+
+# An Active Directory "Application Register" needs to be created and the connection string are required to be configured.
+
+# COMMAND ----------
+
+# DATA LAKE MOUNT
+
+# dbutils.fs.help("mount")
+
+dbutils.fs.mount(
+    source = 'abfss://input@sourcedatalake4.dfs.core.windows.net/'
+    ,mount_point = "/mnt/input"
+    ,extra_configs = configs
+)
+
+
+
+# COMMAND ----------
+
+# dbutils.fs.unmount("/mnt/input")
+
+dbutils.fs.ls("/mnt/input")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC
+# MAGIC <font color='red'><b> 3. SINK DATA - Connect to JDBC
 
 # COMMAND ----------
 
@@ -76,50 +103,6 @@ display(df.limit(5))
 df1 = spark.read.jdbc(connectionString, "dbo.DimProduct")
 
 display(df1.limit(2))
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC
-# MAGIC <font color='red'><b> 3. Mount Object Store
-
-# COMMAND ----------
-
-dbutils.secrets.list("databricksSecrets")
-
-# COMMAND ----------
-
-# help(spark.conf)
-
-# COMMAND ----------
-
-configs = {"fs.azure.account.auth.type": "OAuth"
-,"fs.azure.account.oauth.provider.type": "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider"
-,"fs.azure.account.oauth2.client.id": "634d8a52-7fcb-4126-ae0b-441246f3508d"
-,"fs.azure.account.oauth2.client.secret": dbutils.secrets.get(scope="databricksSecrets",key="service-cred")
-,"fs.azure.account.oauth2.client.endpoint": "https://login.microsoftonline.com/eaf52279-66e9-4cb9-9041-3c8e29d0cdd1/oauth2/token"
-,"fs.azure.createRemoteFileSystemDuringInitialization":"true"
-}
-
-# COMMAND ----------
-
-# DATA LAKE MOUNT
-
-# dbutils.fs.help("mount")
-
-dbutils.fs.mount(
-    source = 'abfss://input@sourcedatalake4.dfs.core.windows.net/'
-    ,mount_point = "/mnt/input"
-    ,extra_configs = configs
-)
-
-
-
-# COMMAND ----------
-
-# dbutils.fs.unmount("/mnt/input")
-
-dbutils.fs.ls("/mnt/input")
 
 # COMMAND ----------
 
