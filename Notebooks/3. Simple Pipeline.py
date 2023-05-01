@@ -182,4 +182,26 @@ ff.write.format("delta").mode("append").save("dbfs:/user/hive/warehouse/dimcusto
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC
+# MAGIC <font color='red'><b> 5. SILVER LAYER - transform data
+
+# COMMAND ----------
+
+from pyspark.sql.functions import col
+from pyspark.sql.types import *
+
+# COMMAND ----------
+
+gf = (spark.read 
+    .table("dimCustomer")  
+        .withColumn("NameStyle", col("NameStyle").cast(BooleanType()))
+        .withColumn("BirthDate", col("BirthDate").cast(DateType()))
+        .withColumn("YearlyIncome", col("YearlyIncome").cast(DecimalType(scale=2)))
+        .withColumn("CustomerKey", col("CustomerKey").cast(IntegerType()))
+)
+display(gf)
+
+# COMMAND ----------
+
 
