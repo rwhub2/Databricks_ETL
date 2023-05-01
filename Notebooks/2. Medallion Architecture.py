@@ -108,7 +108,7 @@ configs = {"fs.azure.account.auth.type": "OAuth"
 # dbutils.fs.help("mount")
 
 dbutils.fs.mount(
-    source = 'abfss://input@sinkadls.dfs.core.windows.net/'
+    source = 'abfss://input@sourcedatalake4.dfs.core.windows.net/'
     ,mount_point = "/mnt/input"
     ,extra_configs = configs
 )
@@ -117,7 +117,9 @@ dbutils.fs.mount(
 
 # COMMAND ----------
 
-dbutils.fs.unmount("/mnt/input")
+# dbutils.fs.unmount("/mnt/input")
+
+dbutils.fs.ls("/mnt/input")
 
 # COMMAND ----------
 
@@ -129,11 +131,43 @@ dbutils.fs.unmount("/mnt/input")
 
 # MAGIC %sql
 # MAGIC
-# MAGIC
-# MAGIC
-# MAGIC CREATE TABLE IF NOT EXISTS dimProduct (
-# MAGIC     id  STRING NOT NULL
+# MAGIC CREATE TABLE IF NOT EXISTS dimCustomer (
+# MAGIC     CustomerKey STRING NOT NULL,
+# MAGIC 	GeographyKey STRING,
+# MAGIC 	CustomerAlternateKey STRING, 
+# MAGIC 	Title STRING,
+# MAGIC 	FirstName STRING,
+# MAGIC 	MiddleName STRING,
+# MAGIC 	LastName STRING,
+# MAGIC 	NameStyle STRING,
+# MAGIC 	BirthDate DATE,
+# MAGIC 	MaritalStatus STRING,
+# MAGIC 	Suffix STRING,
+# MAGIC 	Gender STRING,
+# MAGIC 	EmailAddress STRING,
+# MAGIC 	YearlyIncome DECIMAL,
+# MAGIC 	TotalChildren INT,
+# MAGIC 	NumberChildrenAtHome INT,
+# MAGIC 	EnglishEducation STRING,
+# MAGIC 	SpanishEducation STRING,
+# MAGIC 	FrenchEducation STRING,
+# MAGIC 	EnglishOccupation STRING,
+# MAGIC 	SpanishOccupation STRING,
+# MAGIC 	FrenchOccupation STRING,
+# MAGIC 	HouseOwnerFlag STRING,
+# MAGIC 	NumberCarsOwned INT,
+# MAGIC 	AddressLine1 STRING,
+# MAGIC 	AddressLine2 STRING,
+# MAGIC 	Phone STRING,
+# MAGIC 	DateFirstPurchase DATE,
+# MAGIC 	CommuteDistance STRING
 # MAGIC ) using DELTA
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC
+# MAGIC DROP TABLE dimCustomer
 
 # COMMAND ----------
 
