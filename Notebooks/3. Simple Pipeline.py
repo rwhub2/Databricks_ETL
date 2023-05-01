@@ -1,7 +1,7 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC
-# MAGIC ### Medallion Architecture
+# MAGIC ### Simple Pipeline - Medallion Architecture
 
 # COMMAND ----------
 
