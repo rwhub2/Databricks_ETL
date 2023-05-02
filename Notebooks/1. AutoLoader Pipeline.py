@@ -122,35 +122,35 @@ display(df1.limit(2))
 # MAGIC %sql
 # MAGIC
 # MAGIC CREATE TABLE IF NOT EXISTS dimCustomer (
-# MAGIC   CustomerKey INT NOT NULL,
-# MAGIC 	GeographyKey INT,
+# MAGIC   CustomerKey STRING,
+# MAGIC 	GeographyKey STRING,
 # MAGIC 	CustomerAlternateKey STRING, 
 # MAGIC 	Title STRING,
 # MAGIC 	FirstName STRING,
 # MAGIC 	MiddleName STRING,
 # MAGIC 	LastName STRING,
-# MAGIC 	NameStyle INT,
-# MAGIC 	BirthDate DATE,
+# MAGIC 	NameStyle STRING,
+# MAGIC 	BirthDate STRING,
 # MAGIC 	MaritalStatus STRING,
 # MAGIC 	Suffix STRING,
 # MAGIC 	Gender STRING,
-# MAGIC 	EmailAddress STRING
-# MAGIC 	-- YearlyIncome STRING,
-# MAGIC 	-- TotalChildren STRING,
-# MAGIC 	-- NumberChildrenAtHome STRING,
-# MAGIC 	-- EnglishEducation STRING,
-# MAGIC 	-- SpanishEducation STRING,
-# MAGIC 	-- FrenchEducation STRING,
-# MAGIC 	-- EnglishOccupation STRING,
-# MAGIC 	-- SpanishOccupation STRING,
-# MAGIC 	-- FrenchOccupation STRING,
-# MAGIC 	-- HouseOwnerFlag STRING,
-# MAGIC 	-- NumberCarsOwned STRING,
-# MAGIC 	-- AddressLine1 STRING,
-# MAGIC 	-- AddressLine2 STRING,
-# MAGIC 	-- Phone STRING,
-# MAGIC 	-- DateFirstPurchase STRING,
-# MAGIC 	-- CommuteDistance STRING
+# MAGIC 	EmailAddress STRING,
+# MAGIC 	YearlyIncome STRING,
+# MAGIC 	TotalChildren STRING,
+# MAGIC 	NumberChildrenAtHome STRING,
+# MAGIC 	EnglishEducation STRING,
+# MAGIC 	SpanishEducation STRING,
+# MAGIC 	FrenchEducation STRING,
+# MAGIC 	EnglishOccupation STRING,
+# MAGIC 	SpanishOccupation STRING,
+# MAGIC 	FrenchOccupation STRING,
+# MAGIC 	HouseOwnerFlag STRING,
+# MAGIC 	NumberCarsOwned STRING,
+# MAGIC 	AddressLine1 STRING,
+# MAGIC 	AddressLine2 STRING,
+# MAGIC 	Phone STRING,
+# MAGIC 	DateFirstPurchase STRING,
+# MAGIC 	CommuteDistance STRING
 # MAGIC ) using DELTA
 
 # COMMAND ----------
@@ -173,15 +173,12 @@ spark.readStream.format("cloudFiles")\
 
 # COMMAND ----------
 
-bronze_customer.printSchema()
-
-# COMMAND ----------
-
 # MAGIC %sql
 # MAGIC
 # MAGIC SELECT COUNT(*) FROM dimcustomer;
 # MAGIC
 # MAGIC -- SELECT * FROM dimCustomer
+# MAGIC -- order by CustomerKey 
 
 # COMMAND ----------
 
@@ -191,7 +188,7 @@ bronze_customer.printSchema()
 
 # COMMAND ----------
 
-silver_customer = (spark.read 
+(spark.readStream 
     .table("dimCustomer")  
         .withColumn("CustomerKey", col("CustomerKey").cast(IntegerType()))
         .withColumn("GeographyKey", col("GeographyKey").cast(IntegerType()))       
@@ -199,19 +196,29 @@ silver_customer = (spark.read
         .withColumn("NameStyle", col("NameStyle").cast(BooleanType()))
         .withColumn("BirthDate", col("BirthDate").cast(DateType()))
 
-        .withColumn("EmailAddress", initcap(col("EmailAddress")))
+        .withColumn("EmailAddress",  sha1(col("EmailAddress")))
         .withColumn("YearlyIncome", col("YearlyIncome").cast(DecimalType(scale=2)))
         .withColumn("TotalChildren", col("TotalChildren").cast(IntegerType())) 
         .withColumn("NumberChildrenAtHome", col("NumberChildrenAtHome").cast(IntegerType())) 
         .withColumn("HouseOwnerFlag", col("HouseOwnerFlag").cast(IntegerType())) 
         .withColumn("NumberCarsOwned", col("NumberCarsOwned").cast(IntegerType())) 
         .withColumn("DateFirstPurchase", col("DateFirstPurchase").cast(DateType()))
-
-
-        .withColumn("EncryptEmail", sha1(col("EmailAddress")))
+    .writeStream
+      .option("checkpointLocation", 'dbfs:/mnt/input/checkpoint_silver')
+      .table("silver_dimCustomer")
 )
 
 
+
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC
+# MAGIC SELECT COUNT(*) FROM silver_dimcustomer;
+# MAGIC
+# MAGIC SELECT * FROM silver_dimcustomer
+# MAGIC ORDER BY CustomerKey ASC
 
 # COMMAND ----------
 
@@ -242,6 +249,28 @@ silver_customer.write.format("delta").saveAsTable("silver_dimCustomer")
 
 # COMMAND ----------
 
+# qf = spark.read.table("silver_dimcustomer")
+
+display(qf)
+
+# COMMAND ----------
+
+qf.count()
+
+new = qf.na.drop(subset="CustomerKey",how="all")
+
+# COMMAND ----------
+
+new.count()
+
+display(new)
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC
 # MAGIC <font color='red'><b> 6. GOLD LAYER - FINAL data
+
+# COMMAND ----------
+
+
