@@ -115,7 +115,7 @@ display(df1.limit(2))
 # MAGIC %sql
 # MAGIC
 # MAGIC CREATE TABLE IF NOT EXISTS dimCustomer (
-# MAGIC     CustomerKey STRING NOT NULL,
+# MAGIC   CustomerKey STRING NOT NULL,
 # MAGIC 	GeographyKey STRING,
 # MAGIC 	CustomerAlternateKey STRING, 
 # MAGIC 	Title STRING,
@@ -166,13 +166,13 @@ display(bronze_product)
 
 # COMMAND ----------
 
-ff = spark.read.csv("dbfs:/mnt/input/dimCustomer.csv", header=True)
+bronze_customer = spark.read.csv("dbfs:/mnt/input/dimCustomer.csv", header=True)
 
-display(ff)
+display(bronze_customer)
 
 # COMMAND ----------
 
-ff.write.format("delta").mode("append").save("dbfs:/user/hive/warehouse/dimcustomer")
+bronze_customer.write.format("delta").mode("append").save("dbfs:/user/hive/warehouse/dimcustomer")
 
 # COMMAND ----------
 
@@ -188,19 +188,43 @@ ff.write.format("delta").mode("append").save("dbfs:/user/hive/warehouse/dimcusto
 
 # COMMAND ----------
 
-from pyspark.sql.functions import col
+from pyspark.sql.functions import *
 from pyspark.sql.types import *
 
 # COMMAND ----------
 
-gf = (spark.read 
+silver_customer = (spark.read 
     .table("dimCustomer")  
+        .withColumn("CustomerKey", col("CustomerKey").cast(IntegerType()))
+        .withColumn("GeographyKey", col("GeographyKey").cast(IntegerType()))       
+
         .withColumn("NameStyle", col("NameStyle").cast(BooleanType()))
         .withColumn("BirthDate", col("BirthDate").cast(DateType()))
+
+        .withColumn("EmailAddress", initcap(col("EmailAddress")))
         .withColumn("YearlyIncome", col("YearlyIncome").cast(DecimalType(scale=2)))
-        .withColumn("CustomerKey", col("CustomerKey").cast(IntegerType()))
+        .withColumn("TotalChildren", col("TotalChildren").cast(IntegerType())) 
+        .withColumn("NumberChildrenAtHome", col("NumberChildrenAtHome").cast(IntegerType())) 
+        .withColumn("HouseOwnerFlag", col("HouseOwnerFlag").cast(IntegerType())) 
+        .withColumn("NumberCarsOwned", col("NumberCarsOwned").cast(IntegerType())) 
+        .withColumn("DateFirstPurchase", col("DateFirstPurchase").cast(DateType()))
+
+
+        .withColumn("EncryptEmail", sha1(col("EmailAddress")))
 )
-display(gf)
+display(silver_customer)
+
+# COMMAND ----------
+
+silver_customer.write.format("delta").saveAsTable("silver_dimCustomer")
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC
+# MAGIC SELECT *
+# MAGIC FROM silver_dimcustomer
+# MAGIC order by CustomerKey desc
 
 # COMMAND ----------
 
