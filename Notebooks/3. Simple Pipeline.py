@@ -212,6 +212,19 @@ silver_customer = (spark.read
 
         .withColumn("EncryptEmail", sha1(col("EmailAddress")))
 )
+
+
+
+# COMMAND ----------
+
+cols = silver_customer.columns
+
+recols = cols[0:12] + [cols[-1]] + cols[13:29]
+
+# new
+
+silver_customer = silver_customer.select(recols)
+
 display(silver_customer)
 
 # COMMAND ----------
@@ -222,9 +235,18 @@ silver_customer.write.format("delta").saveAsTable("silver_dimCustomer")
 
 # MAGIC %sql
 # MAGIC
-# MAGIC SELECT *
-# MAGIC FROM silver_dimcustomer
-# MAGIC order by CustomerKey desc
+# MAGIC -- SELECT *
+# MAGIC -- FROM silver_dimcustomer
+# MAGIC -- order by CustomerKey desc
+# MAGIC
+# MAGIC
+# MAGIC -- DROP TABLE silver_dimcustomer
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC
+# MAGIC <font color='red'><b> 6. GOLD LAYER - FINAL data
 
 # COMMAND ----------
 
