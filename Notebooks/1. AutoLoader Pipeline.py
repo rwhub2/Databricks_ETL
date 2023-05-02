@@ -114,6 +114,13 @@ display(df1.limit(2))
 
 # MAGIC %sql
 # MAGIC
+# MAGIC DROP TABLE IF EXISTS dimCustomer;
+# MAGIC DROP TABLE IF EXISTS silver_dimcustomer
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC
 # MAGIC CREATE TABLE IF NOT EXISTS dimCustomer (
 # MAGIC   CustomerKey INT NOT NULL,
 # MAGIC 	GeographyKey INT,
@@ -145,13 +152,6 @@ display(df1.limit(2))
 # MAGIC 	-- DateFirstPurchase STRING,
 # MAGIC 	-- CommuteDistance STRING
 # MAGIC ) using DELTA
-
-# COMMAND ----------
-
-# MAGIC %sql
-# MAGIC
-# MAGIC -- DROP TABLE dimCustomer;
-# MAGIC DROP TABLE silver_dimcustomer
 
 # COMMAND ----------
 
