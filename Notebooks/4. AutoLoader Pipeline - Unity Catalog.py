@@ -7,108 +7,15 @@
 
 # MAGIC %md
 # MAGIC
-# MAGIC <span style="color: red"><b> 1. Secret Scope</span>
+# MAGIC <font color='red'><b> 1. BRONZE LAYER - ingest data from data lake
 
 # COMMAND ----------
 
-dbutils.secrets.list('databricksSecrets')
-
-# COMMAND ----------
-
-# MAGIC %md
+# MAGIC %sql
 # MAGIC
-# MAGIC <font color='red'><b> 2. SOURCE DATA - Mount Object Store
-
-# COMMAND ----------
-
-configs = {"fs.azure.account.auth.type": "OAuth"
-,"fs.azure.account.oauth.provider.type": "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider"
-,"fs.azure.account.oauth2.client.id": "634d8a52-7fcb-4126-ae0b-441246f3508d"
-,"fs.azure.account.oauth2.client.secret": dbutils.secrets.get(scope="databricksSecrets",key="service-cred")
-,"fs.azure.account.oauth2.client.endpoint": "https://login.microsoftonline.com/eaf52279-66e9-4cb9-9041-3c8e29d0cdd1/oauth2/token"
-,"fs.azure.createRemoteFileSystemDuringInitialization":"true"
-}
-
-# An Active Directory "Application Register" needs to be created and the connection string are required to be configured.
-
-# COMMAND ----------
-
-# DATA LAKE MOUNT
-
-# dbutils.fs.help("mount")
-
-dbutils.fs.mount(
-    source = 'abfss://input@sourcedatalake4.dfs.core.windows.net/'
-    ,mount_point = "/mnt/input"
-    ,extra_configs = configs
-)
-
-
-
-# COMMAND ----------
-
-# dbutils.fs.unmount("/mnt/input")
-
-dbutils.fs.ls("/mnt/input")
-
-# COMMAND ----------
-
-# MAGIC %md
+# MAGIC USE CATALOG medallion_architecture;
 # MAGIC
-# MAGIC <font color='red'><b> 3. SINK DATA - Connect to JDBC
-
-# COMMAND ----------
-
-#########################################################################################################
-# METHOD 1
-
-#serverName & portNumber
-jdbcHostname = "dbsserver.database.windows.net"
-jdbcPort = 1433
-
-jdbcUrl = f"jdbc:sqlserver://{jdbcHostname}:{jdbcPort};databaseName={dbn};user={usern};password={passn}"
-
-
-# #property values
-# jdbcDatabase = 'Backup_AdventureWorksDW2019'
-# jdbcUsername = 'sauser'
-# jdbcPassword = 'Adventure9#'
-
-
-
-# The JDBC URL of the form jdbc:subprotocol:subname to connect to. The source-specific connection properties may be specified in the URL. e.g., jdbc:postgresql://localhost/test?user=fred&password=secret
-
-# jdbc:sqlserver://[serverName[\instanceName][:portNumber]][;property=value[;property=value]]
-
-
-#########################################################################################################
-# METHOD 2
-
-connectionString = f'jdbc:sqlserver://dbsserver.database.windows.net:1433;database={dbn};user={usern};password={passn};encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;'
-
-# jdbc:sqlserver://dbsserver.database.windows.net:1433;database=Backup_AdventureWorksDW2019;user=sauser@dbsserver;password={your_password_here};encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;
-
-# COMMAND ----------
-
-# METHOD 1
-
-df = spark.read.format("jdbc").option("url", jdbcUrl).option("dbtable","dbo.DimProduct").load()
-
-display(df.limit(5))
-
-# COMMAND ----------
-
-# METHOD 2
-
-df1 = spark.read.jdbc(connectionString, "dbo.DimProduct")
-
-display(df1.limit(2))
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC
-# MAGIC <font color='red'><b> 4. BRONZE LAYER - ingest data from data lake
+# MAGIC USE staging
 
 # COMMAND ----------
 
@@ -122,7 +29,7 @@ display(df1.limit(2))
 # MAGIC %sql
 # MAGIC
 # MAGIC
-# MAGIC CREATE TABLE IF NOT EXISTS dimCustomer (
+# MAGIC CREATE TABLE IF NOT EXISTS staging.dimCustomer (
 # MAGIC   CustomerKey STRING,
 # MAGIC 	GeographyKey STRING,
 # MAGIC 	CustomerAlternateKey STRING, 
