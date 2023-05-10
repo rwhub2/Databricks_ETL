@@ -13,6 +13,12 @@
 
 # MAGIC %sql
 # MAGIC
+# MAGIC USE CATALOG hive_metastore;
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC
 # MAGIC USE CATALOG medallion_architecture;
 # MAGIC
 # MAGIC USE staging
@@ -69,7 +75,16 @@ display(df.count())
 
 # COMMAND ----------
 
-df.write.format("delta").table('staging.dimCustomer')
+df.write.format("delta").insertInto('staging.dimCustomer')
+
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC
+# MAGIC -- TRUNCATE TABLE staging.dimCustomer;
+# MAGIC
+# MAGIC SELECT * FROM staging.dimCustomer
 
 # COMMAND ----------
 
