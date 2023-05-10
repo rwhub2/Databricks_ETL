@@ -63,6 +63,16 @@
 
 # COMMAND ----------
 
+df = spark.read.csv('dbfs:/mnt/input/dimCustomer.csv', header=True)
+
+display(df.count())
+
+# COMMAND ----------
+
+df.write.format("delta").table('staging.dimCustomer')
+
+# COMMAND ----------
+
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 
